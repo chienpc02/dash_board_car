@@ -549,7 +549,3 @@ def update_graph(select_brand):
 
 # if __name__ == '__main__':
 #     app.run_server(debug=True)
-
-# df = pd.read_csv('gara_all_clean.csv')
-#
-# print(df.columns)
