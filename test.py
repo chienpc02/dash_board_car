@@ -14,6 +14,14 @@ data = pd.read_csv('data_car_all.csv')
 showroom = pd.read_csv('showroom_all_clean.csv')
 thuexe = pd.read_csv('thuexe_all.csv')
 
+provinces = df['Province'].dropna().unique()
+
+
+# Thêm 'Toàn quốc' vào danh sách unique_provinces
+provinces = list(provinces)
+provinces.append('Toàn quốc')
+
+
 group = pd.read_csv('group_oto_sg.csv')
 
 brand_counts = df.groupby(['Province', 'Brand']).size().reset_index(name='Count')
@@ -124,10 +132,10 @@ def render_content(tab):
                                      clearable=True,
                                      disabled=False,
                                      style={'display': True},
-                                     value='Hà Nội',
+                                     value='Toàn quốc',
                                      placeholder='Select Province',
                                      options=[{'label': c, 'value': c}
-                                              for c in (df['Province'].dropna().unique())], className='dcc_compon')
+                                              for c in (provinces)], className='dcc_compon')
 
                     ], className="create_container1 four columns", style={'margin-bottom': '8px'}),
 
@@ -270,24 +278,34 @@ def parse_contents(contents, filename, date):
 @app.callback(Output('top_1', 'figure'),
               [Input('select_region', 'value')])
 def update_graph(select_region):
-    # Replace this line with your brand_counts DataFrame
-    # brand_counts = df.groupby(['Province', 'Thương hiệu']).size().reset_index(name='Count')
 
     # Use your brand_counts DataFrame instead of top_country_world
-    filtered_brand_counts = brand_counts[brand_counts['Province'] == select_region]
+    # filtered_brand_counts = brand_counts[brand_counts['Province'] == select_region]
+    # tq_gara = df[['Brand', 'Name Gara']].groupby('Brand').agg(Name_count=('Name Gara', 'count')).reset_index()
+    # tq_gara.columns = ['Brand', 'Name_count']
+
+    tq_gara = df[['Brand', 'Name Gara']].groupby('Brand').agg(Name_count=('Name Gara', 'count')).reset_index()
+    tq_gara.columns = ['Brand', 'Count']
+
+    if select_region != 'Toàn quốc':
+        filtered_brand_counts = brand_counts[brand_counts['Province'] == select_region]
+    else:
+        filtered_brand_counts = tq_gara
 
     return {
-        'data': [go.Pie(
-            labels=filtered_brand_counts['Brand'],  # Use 'Thương hiệu' for labels
-            values=filtered_brand_counts['Count'],         # Use 'Count' for values
-            textinfo='percent+label',  # Display percentage and label
-            hole=0.3,  # Set the size of the central hole
-            hoverinfo='label+percent+value',
-            marker=dict(
-                colors=['#04B77A', '#FFA500', '#FF6347', '#36C9E4', '#D8BFD8'],  # Define colors
-                line=dict(color='white', width=2)  # Add white borders to slices
+        'data':[
+                go.Pie(
+                labels=filtered_brand_counts['Brand'],  # Use 'Thương hiệu' for labels
+                values=filtered_brand_counts['Count'],         # Use 'Count' for values
+                textinfo='percent+label',  # Display percentage and label
+                hole=0.3,  # Set the size of the central hole
+                hoverinfo='label+percent+value',
+                marker=dict(
+                    colors=['#04B77A', '#FFA500', '#FF6347', '#36C9E4', '#D8BFD8'],  # Define colors
+                    line=dict(color='white', width=2)  # Add white borders to slices
+                )
             )
-        )],
+        ],
 
         'layout': go.Layout(
             plot_bgcolor='#010915',
@@ -312,9 +330,14 @@ def update_graph(select_region):
 def update_graph(select_region):
     # Replace this line with your brand_counts DataFrame
     brand_counts_showroom = showroom.groupby(['Province', 'Brand']).size().reset_index(name='Count')
-    # Use your brand_counts DataFrame instead of top_country_world
-    filtered_brand_counts_showroom = brand_counts_showroom[brand_counts_showroom['Province'] == select_region]
 
+    tq_showroom = showroom[['Brand', 'Name']].groupby('Brand').agg(Name_count=('Name', 'count')).reset_index()
+    tq_showroom.columns = ['Brand', 'Count']
+    # Use your brand_counts DataFrame instead of top_country_world
+    if select_region != 'Toàn quốc':
+        filtered_brand_counts_showroom = brand_counts_showroom[brand_counts_showroom['Province'] == select_region]
+    else:
+        filtered_brand_counts_showroom = tq_showroom
     return {
         'data': [go.Pie(
             labels=filtered_brand_counts_showroom['Brand'],  # Use 'Thương hiệu' for labels
@@ -352,8 +375,15 @@ def update_graph(select_region):
 def update_graph(select_region):
     service_counts = data.groupby(['Province', 'Service']).size().reset_index(name='Count')
 
+    tq_data = data[['Service', 'Name']].groupby('Service').agg(Name_count=('Name', 'count')).reset_index()
+    tq_data.columns = ['Service', 'Count']
+
     # Use your brand_counts DataFrame instead of top_country_world
-    service_counts_filter= service_counts[service_counts['Province'] == select_region]
+    if select_region != 'Toàn quốc':
+        service_counts_filter= service_counts[service_counts['Province'] == select_region]
+    else:
+        service_counts_filter = tq_data
+
     bar_chart = go.Figure()
 
     bar_chart.add_trace(go.Bar(
