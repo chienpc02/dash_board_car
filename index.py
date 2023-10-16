@@ -57,7 +57,7 @@ area_chart.update_traces(
     line=dict(color='darkblue', width=2),  # Line style
     hovertemplate='<b>%{x}</b><br>Count: %{y}',  # Hover template
 )
-
+#cgo
 # do thi group
 fig_group = go.Figure()
 
