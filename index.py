@@ -7,7 +7,8 @@ import io
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
-from dash import Dash, dcc, html, Input, Output, callback
+import  dash
+from dash import Dash, dcc, html, Input, Output, callback, dash_table, State
 import main
 df = pd.read_csv('gara_all_clean.csv')
 data = pd.read_csv('data_car_all.csv')
@@ -88,8 +89,12 @@ fig_group.update_yaxes(showgrid=True, gridwidth=0.5, gridcolor='lightgray')
 
 fig_group.update_layout(title='Số lượng chủ đề và bài viết của group xe oto',title_x=0.5)
 
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-app = Dash(__name__, meta_tags=[{"name": "viewport", "content": "width=device-width"}],suppress_callback_exceptions=True)
+app = Dash(__name__, meta_tags=[{"name": "viewport", "content": "width=device-width"}],suppress_callback_exceptions=True,
+           external_stylesheets=external_stylesheets,
+
+           )
 
 
 
@@ -97,7 +102,7 @@ app.layout = html.Div([
     dcc.Tabs(id="tabs-styled-with-props", value='tab-1', children=[
         dcc.Tab(label='Gara-Showrrom', value='tab-1'),
         dcc.Tab(label='Group', value='tab-2'),
-        dcc.Tab(label='Taxi',value='tab-3'),
+        dcc.Tab(label='Upload file',value='tab-3'),
     ], colors={
         "border": "white",
         "primary": "gold",
@@ -231,6 +236,7 @@ def render_content(tab):
         ])
     elif tab == 'tab-3':
         return  html.Div([
+            html.Div([
             dcc.Upload(
                 id='upload-data',
                 children=html.Div([
@@ -254,6 +260,7 @@ def render_content(tab):
             ),
             html.Div(id='output-div'),
             html.Div(id='output-datatable'),
+            ])
         ])
 
 #  kiểm tra file có phải là csv hay xls hay không
@@ -275,14 +282,66 @@ def parse_contents(contents, filename, date):
             'There was an error processing this file.'
         ])
 
+    return html.Div([
+        html.H5(filename),
+        html.H6(datetime.datetime.fromtimestamp(date)),
+        html.P("Inset X axis data"),
+        dcc.Dropdown(id='xaxis-data',
+                     options=[{'label':x, 'value':x} for x in df.columns],
+                     ),
+
+        html.P("Inset Y axis data"),
+        dcc.Dropdown(id='yaxis-data',
+                     options=[{'label':x, 'value':x} for x in df.columns]),
+        html.Button(id="submit-button", children="Create Graph"),
+        html.Hr(),
+
+        dash_table.DataTable(
+            data=df.to_dict('records'),
+            columns=[{'name': i, 'id': i} for i in df.columns],
+            page_size=15
+        ),
+        dcc.Store(id='stored-data', data=df.to_dict('records')),
+
+        html.Hr(),  # horizontal line
+
+        # For debugging, display the raw contents provided by the web browser
+        html.Div('Raw Content'),
+        html.Pre(contents[0:200] + '...', style={
+            'whiteSpace': 'pre-wrap',
+            'wordBreak': 'break-all'
+        })
+    ])
+
+
+@app.callback(Output('output-datatable', 'children'),
+              Input('upload-data', 'contents'),
+              State('upload-data', 'filename'),
+              State('upload-data', 'last_modified'))
+def update_output(list_of_contents, list_of_names, list_of_dates):
+    if list_of_contents is not None:
+        children = [
+            parse_contents(c, n, d) for c, n, d in
+            zip(list_of_contents, list_of_names, list_of_dates)]
+        return children
+
+
+@app.callback(Output('output-div', 'children'),
+              Input('submit-button','n_clicks'),
+              State('stored-data','data'),
+              State('xaxis-data','value'),
+              State('yaxis-data', 'value'))
+def make_graphs(n, data, x_data, y_data):
+    if n is None:
+        return dash.no_update
+    else:
+        bar_fig = px.bar(data, x=x_data, y=y_data)
+        # print(data)
+        return dcc.Graph(figure=bar_fig)
+
 @app.callback(Output('top_1', 'figure'),
               [Input('select_region', 'value')])
 def update_graph(select_region):
-
-    # Use your brand_counts DataFrame instead of top_country_world
-    # filtered_brand_counts = brand_counts[brand_counts['Province'] == select_region]
-    # tq_gara = df[['Brand', 'Name Gara']].groupby('Brand').agg(Name_count=('Name Gara', 'count')).reset_index()
-    # tq_gara.columns = ['Brand', 'Name_count']
 
     tq_gara = df[['Brand', 'Name Gara']].groupby('Brand').agg(Name_count=('Name Gara', 'count')).reset_index()
     tq_gara.columns = ['Brand', 'Count']
