@@ -96,6 +96,28 @@ app = Dash(__name__, meta_tags=[{"name": "viewport", "content": "width=device-wi
 
            )
 
+tabs_styles = {
+    'height': '44px',
+    'align-items': 'center'
+}
+tab_style = {
+    'borderBottom': '1px solid #d6d6d6',
+    'padding': '6px',
+    'fontWeight': 'bold',
+    'border-radius': '15px',
+    'background-color': '#F2F2F2',
+    'box-shadow': '4px 4px 4px 4px lightgrey',
+
+}
+
+tab_selected_style = {
+    'borderTop': '1px solid #d6d6d6',
+    'borderBottom': '1px solid #d6d6d6',
+    'backgroundColor': '#119DFF',
+    'color': 'white',
+    'padding': '6px',
+    'border-radius': '15px',
+}
 
 
 app.layout = html.Div([
@@ -123,7 +145,7 @@ def render_content(tab):
                         html.Div([
                             html.H3('Garage Information in Vietnam', style={'margin-bottom': '0px', 'color': 'white'}),
                         ])
-                    ], className="create_container1 four columns", id="title"),
+                    ], className="create_container1 twelve columns", id="title"),
 
                 ], id="header", className="row flex-display", style={"margin-bottom": "25px"}),
 
@@ -142,7 +164,22 @@ def render_content(tab):
                                      options=[{'label': c, 'value': c}
                                               for c in (provinces)], className='dcc_compon')
 
-                    ], className="create_container1 four columns", style={'margin-bottom': '8px'}),
+                    ], className="create_container1 six columns", style={'margin-bottom': '8px'}),
+
+                    html.Div([
+                        html.P('Select Province', className='fix_label',
+                               style={'color': 'white', 'text-align': 'center'}),
+                        dcc.Dropdown(id='select_brand',
+                                     multi=False,
+                                     clearable=True,
+                                     disabled=False,
+                                     style={'display': True},
+                                     value='Multibrand',
+                                     placeholder='Select Brand',
+                                     options=[{'label': c, 'value': c}
+                                              for c in (df['Province'].dropna().unique())], className='dcc_compon')
+
+                    ], className="create_container1 six columns", style={'margin-bottom': '8px'}),
 
                 ], className="row flex-display"),
 
@@ -194,7 +231,9 @@ def render_content(tab):
                                      options=[{'label': c, 'value': c}
                                               for c in (brand.unique())], className='dcc_compon')
 
-                    ], className="create_container1 four columns", style={'margin-bottom': '8px'}),
+                    ], className="create_container1 twelve columns", style={'margin-bottom': '8px'}),
+
+
 
                 ], className="row flex-display"),
 
@@ -299,6 +338,14 @@ def parse_contents(contents, filename, date):
         dash_table.DataTable(
             data=df.to_dict('records'),
             columns=[{'name': i, 'id': i} for i in df.columns],
+            style_header={
+                'backgroundColor': 'gold',
+                'fontWeight': 'bold'
+            },
+            style_data={
+                'backgroundColor': 'rgb(50, 50, 50)',
+                'color': 'white'
+            },
             page_size=15
         ),
         dcc.Store(id='stored-data', data=df.to_dict('records')),
@@ -478,7 +525,7 @@ def update_graph(select_region):
             ticks='outside',
             tickfont=dict(
                 family='Arial',
-                size=12,
+                size=20,
                 color='white'
             )
         ),

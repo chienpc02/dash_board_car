@@ -95,6 +95,10 @@ font-size: 20px;
   color: white;
 }
 
+.Select-menu-outer {
+  display: block !important;
+}
+
 /* width */
 ::-webkit-scrollbar {
   width: 10px !important;
