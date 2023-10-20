@@ -661,7 +661,7 @@ def update_graph(select_brand):
     }
 
 
-
+# line_1
 @app.callback(Output('line_1', 'figure'),
               [Input('select_brand', 'value')])
 def update_graph(select_brand):
