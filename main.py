@@ -11,6 +11,8 @@ thuexe = pd.read_csv('thuexe_all.csv')
 
 group = pd.read_csv('group_oto_sg.csv')
 
+#test ssh
+
 brand_counts = df.groupby(['Province', 'Brand']).size().reset_index(name='Count')
 df['Brand'] = df['Brand'].replace(['Huyndai','Huynhdai'], 'Multibrand')
 df1 = df.drop_duplicates(subset=['Company']).drop_duplicates(['Name Gara']).drop_duplicates(subset=['Address'])
