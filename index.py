@@ -10,20 +10,21 @@ import plotly.graph_objs as go
 import  dash
 from dash import Dash, dcc, html, Input, Output, callback, dash_table, State
 
-df = pd.read_csv('file_csv\gara_all_clean.csv')
-data = pd.read_csv('file_csv\data_car_all.csv')
-showroom = pd.read_csv('file_csv\showroom_all_clean.csv')
-thuexe = pd.read_csv('file_csv/thuexe_all.csv')
+df = pd.read_csv('gara_all_clean.csv')
+data = pd.read_csv('data_car_all.csv')
+showroom = pd.read_csv('showroom_all_clean.csv')
+thuexe = pd.read_csv('thuexe_all.csv')
 
 provinces = df['Province'].dropna().unique()
 
+data = data.drop_duplicates()
 
 # Thêm 'Toàn quốc' vào danh sách unique_provinces
 provinces = list(provinces)
 provinces.append('Toàn quốc')
 
 
-group = pd.read_csv('file_csv\group_oto_sg.csv')
+group = pd.read_csv('group_oto_sg.csv')
 
 brand_counts = df.groupby(['Province', 'Brand']).size().reset_index(name='Count')
 df['Brand'] = df['Brand'].replace(['Huyndai','Huynhdai'], 'Multibrand')
@@ -38,25 +39,7 @@ loan_car_province = thuexe.groupby(['Province']).size().reset_index(name='Count'
 
 
 
-area_chart = px.area(loan_car_province, x='Province', y='Count', title='Số lượng doanh nghiệp cho thuê')
 
-# Customize the chart appearance
-area_chart.update_layout(
-    xaxis_title='Province',
-    yaxis_title='Count',
-    plot_bgcolor='lightblue',
-    paper_bgcolor='lightgray',
-    font=dict(family='Arial', size=14, color='black'),  # Font settings
-    title_font=dict(size=18, color='darkblue'),         # Title font settings
-    showlegend=False,       # Hide legend
-    title_x=0.5
-)
-
-area_chart.update_traces(
-    fill='tozeroy',  # Fill area to the x-axis
-    line=dict(color='darkblue', width=2),  # Line style
-    hovertemplate='<b>%{x}</b><br>Count: %{y}',  # Hover template
-)
 #cgo
 # do thi group
 fig_group = go.Figure()
@@ -222,7 +205,7 @@ def render_content(tab):
 
                     html.Div([
                         html.Br(),
-                        dcc.Graph(figure=area_chart, id='top_4',
+                        dcc.Graph( id='top_4',
                                   config={'displayModeBar': 'hover'}),
 
                     ], className='create_container six columns'),
@@ -564,7 +547,33 @@ def update_graph(select_region):
 
     return bar_chart
 
+@app.callback(Output('top_4', 'figure'),
+              [Input('select_service', 'value')])
 
+def update_graph(select_service):
+    dt = data.groupby(['Service', 'Province']).size().reset_index(name='Count')
+    count_car = dt[dt['Service'] == select_service]
+    area_chart = px.area(count_car, x='Province', y='Count', title='Số lượng doanh nghiệp ngành '+ str(select_service))
+
+    # Customize the chart appearance
+    area_chart.update_layout(
+        xaxis_title='Province',
+        yaxis_title='Count',
+        plot_bgcolor='lightblue',
+        paper_bgcolor='lightgray',
+        font=dict(family='Arial', size=14, color='black'),  # Font settings
+        title_font=dict(size=18, color='darkblue'),  # Title font settings
+        showlegend=False,  # Hide legend
+        title_x=0.5
+    )
+
+    area_chart.update_traces(
+        fill='tozeroy',  # Fill area to the x-axis
+        line=dict(color='darkblue', width=2),  # Line style
+        hovertemplate='<b>%{x}</b><br>Count: %{y}',  # Hover template
+    )
+
+    return area_chart
 
 # combination of bar and line chart (population and area)
 @app.callback(Output('bar_line_1', 'figure'),

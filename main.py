@@ -5,11 +5,11 @@ import pandas as pd
 
 
 df = pd.read_csv('file_csv/Gara_all_clean.csv')
-data = pd.read_csv('file_csv/data_car_all.csv')
-showroom = pd.read_csv('file_csv/showroom_all_clean.csv')
-thuexe = pd.read_csv('file_csv/thuexe_all.csv')
+data = pd.read_csv('data_car_all.csv')
+showroom = pd.read_csv('showroom_all_clean.csv')
+thuexe = pd.read_csv('thuexe_all.csv')
 
-group = pd.read_csv('file_csv/group_oto_sg.csv')
+group = pd.read_csv('group_oto_sg.csv')
 
 brand_counts = df.groupby(['Province', 'Brand']).size().reset_index(name='Count')
 df['Brand'] = df['Brand'].replace(['Huyndai','Huynhdai'], 'Multibrand')
