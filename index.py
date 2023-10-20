@@ -57,7 +57,7 @@ area_chart.update_traces(
     line=dict(color='darkblue', width=2),  # Line style
     hovertemplate='<b>%{x}</b><br>Count: %{y}',  # Hover template
 )
-
+#cgo
 # do thi group
 fig_group = go.Figure()
 
@@ -167,18 +167,28 @@ def render_content(tab):
                     ], className="create_container1 six columns", style={'margin-bottom': '8px'}),
 
                     html.Div([
-                        html.P('Select Province', className='fix_label',
+                        html.P('Select Service', className='fix_label',
                                style={'color': 'white', 'text-align': 'center'}),
-                        dcc.Dropdown(id='select_province',
+
+                        # dcc.Dropdown(id='select_province',
+                        #              clearable=True,
+                        #              disabled=False,
+                        #              style={'display': True},
+                        #              ),
+
+                        dcc.Dropdown(id='select_service',
                                      multi=False,
                                      clearable=True,
                                      disabled=False,
                                      style={'display': True},
+
                                      # value='Multibrand',
-                                     placeholder='Select Province',
+                                     placeholder='Select Service',
+
+                                     # value='Multibrand',
 
                                      options=[{'label': c, 'value': c}
-                                              for c in (df['Province'].dropna().unique())], className='dcc_compon')
+                                              for c in (data['Service'].dropna().unique())], className='dcc_compon')
 
                     ], className="create_container1 six columns", style={'margin-bottom': '8px'}),
 
