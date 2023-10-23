@@ -10,10 +10,12 @@ import plotly.graph_objs as go
 import  dash
 from dash import Dash, dcc, html, Input, Output, callback, dash_table, State
 
-df = pd.read_csv('gara_all_clean.csv')
-data = pd.read_csv('data_car_all.csv')
-showroom = pd.read_csv('showroom_all_clean.csv')
-thuexe = pd.read_csv('thuexe_all.csv')
+df = pd.read_csv('file_csv/gara_all_clean.csv')
+data = pd.read_csv('file_csv/data_car_all.csv')
+showroom = pd.read_csv('file_csv/showroom_all_clean.csv')
+thuexe = pd.read_csv('file_csv/thuexe_all.csv')
+
+data_company = pd.read_csv('file_csv/data_oto_all.csv')
 
 provinces = df['Province'].dropna().unique()
 
@@ -24,7 +26,7 @@ provinces = list(provinces)
 provinces.append('Toàn quốc')
 
 
-group = pd.read_csv('group_oto_sg.csv')
+group = pd.read_csv('file_csv/group_oto_sg.csv')
 
 brand_counts = df.groupby(['Province', 'Brand']).size().reset_index(name='Count')
 df['Brand'] = df['Brand'].replace(['Huyndai','Huynhdai'], 'Multibrand')
@@ -473,9 +475,11 @@ def update_graph(select_region):
 @app.callback(Output('top_3', 'figure'),
               [Input('select_region', 'value')])
 def update_graph(select_region):
-    service_counts = data.groupby(['Province', 'Service']).size().reset_index(name='Count')
 
-    tq_data = data[['Service', 'Name']].groupby('Service').agg(Name_count=('Name', 'count')).reset_index()
+    data_all = pd.concat([data[['Name','Province','Service']],data_company[['Name','Province','Service']]])
+    service_counts = data_all.groupby(['Province', 'Service']).size().reset_index(name='Count')
+
+    tq_data = data_all[['Service', 'Name']].groupby('Service').agg(Name_count=('Name', 'count')).reset_index()
     tq_data.columns = ['Service', 'Count']
 
     # Use your brand_counts DataFrame instead of top_country_world
@@ -519,7 +523,7 @@ def update_graph(select_region):
             ticks='outside',
             tickfont=dict(
                 family='Arial',
-                size=20,
+                size=12,
                 color='white'
             )
         ),

@@ -5,11 +5,11 @@ import pandas as pd
 
 
 df = pd.read_csv('file_csv/Gara_all_clean.csv')
-data = pd.read_csv('data_car_all.csv')
-showroom = pd.read_csv('showroom_all_clean.csv')
-thuexe = pd.read_csv('thuexe_all.csv')
+data = pd.read_csv('file_csv/data_car_all.csv')
+showroom = pd.read_csv('file_csv/showroom_all_clean.csv')
+thuexe = pd.read_csv('file_csv/thuexe_all.csv')
 
-group = pd.read_csv('group_oto_sg.csv')
+group = pd.read_csv('file_csv/group_oto_sg.csv')
 
 #test ssh
 
@@ -462,24 +462,7 @@ def update_graph(select_brand):
                    mode='markers+lines',
                    marker=dict(color='green'),
                    hoverinfo='text',
-                   # hovertext=
-                   # '<b>Brand</b>: ' + quantity_car[quantity_car['Brand'] == select_brand]['Brand'].astype(str) + '<br>'
-                   # '<b>Country</b>: ' + world_pop_1[world_pop_1['Region'] == select_region]['Country'].astype(str) + '<br>' +
-                   # '<b>Birth Rate</b>: ' + world_pop_1[world_pop_1['Region'] == select_region]['Birthrate'].astype(str) + '<br>'
-
             )],
-
-            # go.Scatter(
-            #     x=world_pop_1[world_pop_1['Region'] == select_region]['Country'],
-            #     y=world_pop_1[world_pop_1['Region'] == select_region]['Deathrate'],
-            #     name='Death Rate',
-            #     mode='markers+lines',
-            #     marker=dict(color='red'),
-            #     hoverinfo='text',
-            #     hovertext=
-            #     '<b>Death Rate</b>: ' + world_pop_1[world_pop_1['Region'] == select_region]['Deathrate'].astype(str) + '<br>'
-            #
-            # )],
 
 
         'layout': go.Layout(
