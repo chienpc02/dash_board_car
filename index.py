@@ -7,7 +7,7 @@ import io
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
-import  dash
+import dash
 from dash import Dash, dcc, html, Input, Output, callback, dash_table, State
 
 df = pd.read_csv('file_csv/gara_all_clean.csv')
@@ -29,12 +29,12 @@ provinces.append('Toàn quốc')
 group = pd.read_csv('file_csv/group_oto_sg.csv')
 
 brand_counts = df.groupby(['Province', 'Brand']).size().reset_index(name='Count')
-df['Brand'] = df['Brand'].replace(['Huyndai','Huynhdai'], 'Multibrand')
+df['Brand'] = df['Brand'].replace(['Huyndai', 'Huynhdai'], 'Multibrand')
 df1 = df.drop_duplicates(subset=['Company']).drop_duplicates(['Name Gara']).drop_duplicates(subset=['Address'])
 
-brand = pd.concat([df['Brand'],showroom['Brand']]).dropna()
+brand = pd.concat([df['Brand'], showroom['Brand']]).dropna()
 
-showroom['Province'] = showroom['Province'].replace({'TP HCM': 'Tp Hcm','TT Huế':'Tt Huế','Khánh Hoà':'Khánh Hòa'})
+showroom['Province'] = showroom['Province'].replace({'TP HCM': 'Tp Hcm', 'TT Huế': 'Tt Huế', 'Khánh Hoà': 'Khánh Hòa'})
 
 # Ve do thi area
 loan_car_province = thuexe.groupby(['Province']).size().reset_index(name='Count')
@@ -109,7 +109,7 @@ app.layout = html.Div([
     dcc.Tabs(id="tabs-styled-with-props", value='tab-1', children=[
         dcc.Tab(label='Gara-Showrrom', value='tab-1'),
         dcc.Tab(label='Group', value='tab-2'),
-        dcc.Tab(label='Upload file',value='tab-3'),
+        dcc.Tab(label='Upload file', value='tab-3'),
     ], colors={
         "border": "white",
         "primary": "gold",
@@ -166,12 +166,7 @@ def render_content(tab):
                                      clearable=True,
                                      disabled=False,
                                      style={'display': True},
-
-                                     # value='Multibrand',
                                      placeholder='Select Service',
-
-                                     # value='Multibrand',
-
                                      options=[{'label': c, 'value': c}
                                               for c in (data['Service'].dropna().unique())], className='dcc_compon')
 
@@ -207,7 +202,7 @@ def render_content(tab):
 
                     html.Div([
                         html.Br(),
-                        dcc.Graph( id='top_4',
+                        dcc.Graph(id='top_4',
                                   config={'displayModeBar': 'hover'}),
 
                     ], className='create_container six columns'),
@@ -270,7 +265,7 @@ def render_content(tab):
             ], className="row flex-display"),
         ])
     elif tab == 'tab-3':
-        return  html.Div([
+        return html.Div([
             html.Div([
             dcc.Upload(
                 id='upload-data',
@@ -309,7 +304,7 @@ def parse_contents(contents, filename, date):
             df = pd.read_csv(
                 io.StringIO(decoded.decode('utf-8')))
         elif 'xls' in filename:
-            # Assume that the user uploaded an excel file
+
             df = pd.read_excel(io.BytesIO(decoded))
     except Exception as e:
         print(e)
@@ -322,7 +317,7 @@ def parse_contents(contents, filename, date):
         html.H6(datetime.datetime.fromtimestamp(date)),
         html.P("Inset X axis data"),
         dcc.Dropdown(id='xaxis-data',
-                     options=[{'label':x, 'value':x} for x in df.columns],
+                     options=[{'label': x, 'value': x} for x in df.columns],
                      ),
 
         html.P("Inset Y axis data"),
@@ -397,16 +392,16 @@ def update_graph(select_region):
     return {
         'data':[
                 go.Pie(
-                labels=filtered_brand_counts['Brand'],  # Use 'Thương hiệu' for labels
-                values=filtered_brand_counts['Count'],         # Use 'Count' for values
-                textinfo='percent+label',  # Display percentage and label
-                hole=0.3,  # Set the size of the central hole
-                hoverinfo='label+percent+value',
-                marker=dict(
-                    colors=['#04B77A', '#FFA500', '#FF6347', '#36C9E4', '#D8BFD8'],  # Define colors
-                    line=dict(color='white', width=2)  # Add white borders to slices
+                    labels=filtered_brand_counts['Brand'],  # Use 'Thương hiệu' for labels
+                    values=filtered_brand_counts['Count'],         # Use 'Count' for values
+                    textinfo='percent+label',  # Display percentage and label
+                    hole=0.3,  # Set the size of the central hole
+                    hoverinfo='label+percent+value',
+                    marker=dict(
+                        colors=['#04B77A', '#FFA500', '#FF6347', '#36C9E4', '#D8BFD8'],  # Define colors
+                        line=dict(color='white', width=2)  # Add white borders to slices
+                    )
                 )
-            )
         ],
 
         'layout': go.Layout(
@@ -476,7 +471,7 @@ def update_graph(select_region):
               [Input('select_region', 'value')])
 def update_graph(select_region):
 
-    data_all = pd.concat([data[['Name','Province','Service']],data_company[['Name','Province','Service']]])
+    data_all = pd.concat([data[['Name', 'Province', 'Service']], data_company[['Name', 'Province', 'Service']]])
     service_counts = data_all.groupby(['Province', 'Service']).size().reset_index(name='Count')
 
     tq_data = data_all[['Service', 'Name']].groupby('Service').agg(Name_count=('Name', 'count')).reset_index()
@@ -484,7 +479,7 @@ def update_graph(select_region):
 
     # Use your brand_counts DataFrame instead of top_country_world
     if select_region != 'Toàn quốc':
-        service_counts_filter= service_counts[service_counts['Province'] == select_region]
+        service_counts_filter = service_counts[service_counts['Province'] == select_region]
     else:
         service_counts_filter = tq_data
 
@@ -493,11 +488,12 @@ def update_graph(select_region):
     bar_chart.add_trace(go.Bar(
         x=service_counts_filter['Service'],
         y=service_counts_filter['Count'],
-        text = service_counts_filter['Count'],
-        hoverinfo = 'text',
+        text=service_counts_filter['Count'],
+        hoverinfo='text',
         hovertext=[f'{prov} - {count}' for prov, count in
                    zip(service_counts_filter['Service'], service_counts_filter['Count'])],
-        marker_color=['#04B77A', '#FFA500', '#FF6347', '#36C9E4', '#D8BFD8']
+        marker_color =['#04B77A', '#FFA500', '#FF6347', '#36C9E4', '#D8BFD8', '#FF69B4', '#7B68EE', '#40E0D0',
+                       '#87CEFA', '#FA8072']
     ))
 
     bar_chart.update_layout(
@@ -596,9 +592,9 @@ def update_graph(select_brand):
     province_names = brand_pro_selected['Province'].tolist()
     # Create a bar chart for brand counts by province
     bar_pro_fig = go.Bar(
-        x=brand_pro_selected['Province'],  # Use 'Province' for x-axis
-        y=brand_pro_selected['Count'],  # Use 'Count' for y-axis
-        text=brand_pro_selected['Province']  ,  # Set the text to display the province names
+        x=brand_pro_selected['Province'],
+        y=brand_pro_selected['Count'],
+        text=brand_pro_selected['Province'],  # Set the text to display the province names
         hoverinfo='text',
         hovertext=[f'{prov} - {count}' for prov, count in zip(brand_pro_selected['Province'], brand_pro_selected['Count'])],
         name='Province',
