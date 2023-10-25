@@ -35,6 +35,9 @@ body {
   padding: 5px;
   width: calc(100%-40px);
 }
+.custom-radio-items label {
+    margin-right: 20px;
+}
 
 .fix_label {
 font-size: 20px;
