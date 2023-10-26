@@ -1,7 +1,7 @@
 
 import  requests
 import pandas as pd
-import nocodb
+
 def load_data_nocodb(url_table, header):
 
     data = []
