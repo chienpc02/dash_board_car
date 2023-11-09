@@ -15,7 +15,7 @@ def load_data_nocodb(url_table, header):
         # headers = {"xc-auth": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InBoYW1ja
         # GllbjAxMDQyMDAyQGdtYWlsLmNvbSIsImRpc3BsYXlfbmFtZSI6IlBo4bqhbSBWxINuIENoaeG6v24iLCJhdmF0YXIiOm51bGwsInVzZXJfbmFtZSI6bnVsbCwiaWQiOiJ1c2N3ODA2dTdkdjNkbGdnIiwicm9sZXMiOiJvcmctbGV2ZWwtdmlld2VyIiwidG9rZW5fdmVyc2lvbiI6Ijc3ZmUxNmJlYTJhOGQwMzM5MzFkZDc5YzEzNjU1ZjQ3NDQ5ZjcyN2IxYmUwMGVlYjI1YjM2YWViNGMyZDE1MWM5ZjU3MTI0NDFkOWJmNzhlIiwicHJvdmlkZXIiOiJjb2duaXRvIiwiaWF0IjoxNjk4MjE1ODA2LCJleHAiOjE2OTgyNTE4MDZ9.m4V_7Vwx-EFLl8A_8vnaz-vnprdOjbRXgw4PzII7pM0"}
 
-        headers = {"xc-auth": str(header)}
+        headers = {"xc-auth": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InBoYW12YW5jaGllbjIwMDIuMUBnbWFpbC5jb20iLCJkaXNwbGF5X25hbWUiOiJEdW5nIE5ndXllbiIsImF2YXRhciI6bnVsbCwidXNlcl9uYW1lIjpudWxsLCJpZCI6InVzb29qeXplenZ4c3VhM2QiLCJyb2xlcyI6Im9yZy1sZXZlbC12aWV3ZXIiLCJ0b2tlbl92ZXJzaW9uIjoiYmZkZjdkZjgxOWQ1NWIxNWQ2M2RiNmM3NDViNWM3ZjA0NmViYmQxYjViMDEyYjg3NWFmNjQzMDQ3YjE5YWIwMTA3M2YzNzI0MmM0NDI2YTUiLCJpYXQiOjE2OTg0MDMxOTcsImV4cCI6MTY5ODQzOTE5N30.npswY8ZgGzFU_IYvVseLnPGmJCY70r6FA9P3qL-WEvg"}
 
         response = requests.request("GET", url, headers=headers, params=querystring)
         if response.status_code == 200:

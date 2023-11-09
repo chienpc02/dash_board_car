@@ -71,35 +71,35 @@ fig_group.update_yaxes(showgrid=True, gridwidth=0.5, gridcolor='lightgray')
 
 fig_group.update_layout(title='Số lượng chủ đề và bài viết của group xe oto',title_x=0.5)
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+# external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = Dash(__name__, meta_tags=[{"name": "viewport", "content": "width=device-width"}],suppress_callback_exceptions=True,
-           external_stylesheets=external_stylesheets,
+           # external_stylesheets=external_stylesheets,
 
            )
 
-tabs_styles = {
-    'height': '44px',
-    'align-items': 'center'
-}
-tab_style = {
-    'borderBottom': '1px solid #d6d6d6',
-    'padding': '6px',
-    'fontWeight': 'bold',
-    'border-radius': '15px',
-    'background-color': '#F2F2F2',
-    'box-shadow': '4px 4px 4px 4px lightgrey',
-
-}
-
-tab_selected_style = {
-    'borderTop': '1px solid #d6d6d6',
-    'borderBottom': '1px solid #d6d6d6',
-    'backgroundColor': '#119DFF',
-    'color': 'white',
-    'padding': '6px',
-    'border-radius': '15px',
-}
+# tabs_styles = {
+#     'height': '44px',
+#     'align-items': 'center'
+# }
+# tab_style = {
+#     'borderBottom': '1px solid #d6d6d6',
+#     'padding': '6px',
+#     'fontWeight': 'bold',
+#     'border-radius': '15px',
+#     'background-color': '#F2F2F2',
+#     'box-shadow': '4px 4px 4px 4px lightgrey',
+#
+# }
+#
+# tab_selected_style = {
+#     'borderTop': '1px solid #d6d6d6',
+#     'borderBottom': '1px solid #d6d6d6',
+#     'backgroundColor': '#119DFF',
+#     'color': 'white',
+#     'padding': '6px',
+#     'border-radius': '15px',
+# }
 
 
 app.layout = html.Div([
@@ -157,7 +157,7 @@ def render_content(tab):
                         dcc.Dropdown(id='select_service',
                                      options=[{'label': c, 'value': c}
                                               for c in (service)],
-                                     value=service[4],
+                                     value=service[3],
                                      multi=False,
                                      clearable=True,
                                      disabled=False,
@@ -184,7 +184,7 @@ def render_content(tab):
                     ], className='create_container six columns'),
 
                     html.Div([
-                        # html.Br(),
+                        html.Br(),
                         dcc.Graph(id='top_2',
                                   config={'displayModeBar': 'hover'}),
 
@@ -257,8 +257,8 @@ def render_content(tab):
             html.Div([
                html.Div([
                    html.Br(),
-                   html.P('Vizualize', className='fix_label', style={'text-align': 'center', 'color': 'red'}),
-                   dcc.RadioItems(id='id_viza', options=['Group', 'Insurance Company', 'Automobile Company'],
+                   html.P('Visualize', className='fix_label', style={'text-align': 'center', 'color': 'red'}),
+                   dcc.RadioItems(id='id_visua', options=['Group', 'Automobile Company'],
                                   value='Group',
                                   inline=True,
                                   style={'text-align': 'center', 'color': 'white'}, className='custom-radio-items')
@@ -267,8 +267,8 @@ def render_content(tab):
 
             html.Div([
                 html.Div([
-                    html.Br(),
-                    dcc.Graph(figure=fig_group, id='top_',
+
+                    dcc.Graph(id='chart_tab2',
                               config={'displayModeBar': 'hover'})], className="create_container1 twelve columns"),
 
             ], className="row flex-display"),
@@ -333,56 +333,6 @@ def update_graph(select_region, id_choose):
             margin=dict(l=130, b=0, r=0, t=17)
         )
     }
-
-@app.callback(Output('top_2', 'figure'),
-              [Input('select_service', 'value')])
-
-def update_graph(select_service):
-    dt = data_company.groupby(['Service', 'Years active']).size().reset_index(name='Count')
-    data_years = dt[dt['Service'] == select_service]
-    area_year = px.area(data_years, x='Years active',y='Count')
-
-    # Customize the chart appearance
-    area_year.update_layout(
-        plot_bgcolor='#010915',
-        paper_bgcolor='#010915',
-        font=dict(family='Arial', size=14, color='white'),
-        title_font=dict(size=18, color='white'),
-        showlegend=True,
-        title_x=0.5,
-        xaxis=dict(
-            title='<b></b>',
-            color='white',
-            showline=True,
-            showgrid=False,
-            showticklabels=True,
-            tickfont=dict(
-                family='Arial',
-                size=12,
-                color='white'
-            )
-        ),
-        yaxis=dict(
-            title='<b>Số lượng doanh nghiệp</b>',
-            color='white',
-            showline=True,
-            showgrid=False,
-            showticklabels=True,
-            tickfont=dict(
-                family='Arial',
-                size=12,
-                color='white'
-            )
-        )
-    )
-
-    area_year.update_traces(
-        fill='tozeroy',
-        line=dict(color='#F4D03F', width=2),
-        hovertemplate='<b>%{x}</b><br>Count: %{y}',
-    )
-
-    return area_year
 
 
 
@@ -466,14 +416,64 @@ def update_graph(select_region):
 
     return bar_chart
 
+
+@app.callback(Output('top_2', 'figure'), [Input('select_service', 'value')])
+def update_graph(select_service):
+    dt = data_company.groupby(['Service', 'Years active']).size().reset_index(name='Count')
+    dt = dt.drop(dt[dt['Years active'] == 0].index)
+
+    data_years = dt[dt['Service'] == select_service]
+    stick_chart = px.strip(data_years, x='Years active', y='Count',
+                           title=f'Stick Chart for Years Active in {select_service}',
+                           orientation='v',  # 'v' for vertical
+                           color_discrete_sequence=['#3498db'])  # Set color (e.g., blue)
+
+    # Customize the chart appearance
+    stick_chart.update_layout(
+        plot_bgcolor='#010915',
+        paper_bgcolor='#010915',
+        font=dict(family='Arial', size=14, color='white'),
+        title_font=dict(size=18, color='white'),
+        showlegend=False,
+        title_x=0.5,
+
+        xaxis=dict(
+            title='<b>Years Active</b>',
+            color='white',
+            showline=True,
+            showgrid=False,
+            showticklabels=True,
+            tickfont=dict(
+                family='Arial',
+                size=12,
+                color='white'
+            )
+        ),
+        yaxis=dict(
+            title='<b>Count</b>',
+            color='white',
+            showline=True,
+            showgrid=False,
+            showticklabels=True,
+            tickfont=dict(
+                family='Arial',
+                size=12,
+                color='white'
+            )
+        )
+    )
+
+    return stick_chart
+
+
 @app.callback(Output('top_4', 'figure'),
               [Input('select_service', 'value')])
 
 def update_graph(select_service):
     data_cpn_all = pd.concat([data[['Name', 'Province', 'Service']], data_company[['Name', 'Province', 'Service']]])
-    dt = data_cpn_all.groupby(['Service', 'Province']).size().reset_index(name='Count')
-    count_car = dt[dt['Service'] == select_service]
-    area_chart = px.area(count_car, x='Province', y='Count', title='Số lượng doanh nghiệp ngành '+ str(select_service))
+    dt1 = data_cpn_all.groupby(['Service', 'Province']).size().reset_index(name='Count')
+    count_car = dt1[dt1['Service'] == select_service]
+    area_chart = px.area(count_car, x='Province', y='Count', title='Số lượng doanh nghiệp ngành ' + str(select_service))
 
     # Customize the chart appearance
     area_chart.update_layout(
@@ -483,6 +483,7 @@ def update_graph(select_service):
         title_font=dict(size=18, color='white'),  # Title font settings
         showlegend=True,  # Hide legend
         title_x=0.5,
+
         xaxis=dict(title='<b></b>',
                    color='white',
                    showline=True,
@@ -696,6 +697,32 @@ def update_graph(select_brand):
                  )
 
     }
+
+@app.callback(Output('chart_tab2', 'figure'),
+              [Input('id_visua', 'value')])
+
+def update_graph(id_visua):
+
+    service_company = pd.concat([data, data_company])
+    service_company = service_company.groupby(['Service', 'Province'])['Name'].count().reset_index()
+    service_company.rename(columns={'Name': 'Company Count'}, inplace=True)
+
+
+    if id_visua == 'Group':
+        return fig_group
+    elif id_visua == 'Automobile Company':
+        fig = px.sunburst(service_company, path=['Service', 'Province'], values='Company Count', color='Company Count', color_continuous_scale='viridis')
+
+        fig.update_layout(
+            title={
+                'text': 'Số lượng công ty của các tỉnh thành phân bố theo ngành',
+                'x': 0.5
+            },
+            margin=dict(t=50, l=0, r=0, b=0),
+        )
+
+        return fig
+
 
 if __name__ == '__main__':
     app.run(debug=True)
