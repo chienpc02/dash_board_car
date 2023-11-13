@@ -1,21 +1,20 @@
-
-# import matplotlib.pyplot as plt
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
 
 from dash import Dash, dcc, html, Input, Output, callback
 
-df = pd.read_csv('file_csv/gara_all_clean.csv')
+gara = pd.read_csv('file_csv/gara_all_clean.csv')
 data = pd.read_csv('file_csv/data_car_all.csv')
 showroom = pd.read_csv('file_csv/showroom_all_clean.csv')
 thuexe = pd.read_csv('file_csv/thuexe_all.csv')
 
 data_company = pd.read_csv('file_csv/data_oto_all.csv')
 
-provinces = df['Province'].dropna().unique()
+provinces = gara['Province'].dropna().unique()
 
 data = data.drop_duplicates()
+data['Service'] = data['Service'].replace({'Showroom': 'Bán lẻ oto', 'Gara': 'Bảo dưỡng'})
 
 # Thêm 'Toàn quốc' vào danh sách unique_provinces
 provinces = list(provinces)
@@ -25,21 +24,17 @@ service = pd.concat([data['Service'], data_company['Service']]).unique()
 
 group = pd.read_csv('file_csv/group_oto_sg.csv')
 
-brand_counts = df.groupby(['Province', 'Brand']).size().reset_index(name='Count')
-df['Brand'] = df['Brand'].replace(['Huyndai', 'Huynhdai'], 'Multibrand')
-df1 = df.drop_duplicates(subset=['Company']).drop_duplicates(['Name Gara']).drop_duplicates(subset=['Address'])
+brand_counts = gara.groupby(['Province', 'Brand']).size().reset_index(name='Count')
+gara['Brand'] = gara['Brand'].replace(['Huyndai', 'Huynhdai'], 'Multibrand')
+df1 = gara.drop_duplicates(subset=['Company']).drop_duplicates(['Name Gara']).drop_duplicates(subset=['Address'])
 
-brand = pd.concat([df['Brand'], showroom['Brand']]).dropna()
+brand = pd.concat([gara['Brand'], showroom['Brand']]).dropna()
 
 showroom['Province'] = showroom['Province'].replace({'TP HCM': 'Tp Hcm', 'TT Huế': 'Tt Huế', 'Khánh Hoà': 'Khánh Hòa'})
 
 # Ve do thi area
 loan_car_province = thuexe.groupby(['Province']).size().reset_index(name='Count')
 
-
-
-
-#cgo
 # do thi group
 fig_group = go.Figure()
 
@@ -73,39 +68,14 @@ fig_group.update_layout(title='Số lượng chủ đề và bài viết của g
 
 # external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-app = Dash(__name__, meta_tags=[{"name": "viewport", "content": "width=device-width"}],suppress_callback_exceptions=True,
+app = Dash(__name__, meta_tags=[{"name": "viewport", "content": "width=device-width"}], suppress_callback_exceptions=True,
            # external_stylesheets=external_stylesheets,
-
            )
-
-# tabs_styles = {
-#     'height': '44px',
-#     'align-items': 'center'
-# }
-# tab_style = {
-#     'borderBottom': '1px solid #d6d6d6',
-#     'padding': '6px',
-#     'fontWeight': 'bold',
-#     'border-radius': '15px',
-#     'background-color': '#F2F2F2',
-#     'box-shadow': '4px 4px 4px 4px lightgrey',
-#
-# }
-#
-# tab_selected_style = {
-#     'borderTop': '1px solid #d6d6d6',
-#     'borderBottom': '1px solid #d6d6d6',
-#     'backgroundColor': '#119DFF',
-#     'color': 'white',
-#     'padding': '6px',
-#     'border-radius': '15px',
-# }
-
 
 app.layout = html.Div([
     dcc.Tabs(id="tabs-styled-with-props", value='tab-1', children=[
         dcc.Tab(label='Gara-Showrrom', value='tab-1'),
-        dcc.Tab(label='Group', value='tab-2'),
+        dcc.Tab(label='Other', value='tab-2'),
         # dcc.Tab(label='Upload file', value='tab-3'),
     ], colors={
         "border": "white",
@@ -158,8 +128,8 @@ def render_content(tab):
                                      options=[{'label': c, 'value': c}
                                               for c in (service)],
                                      value=service[3],
-                                     multi=False,
-                                     clearable=True,
+                                     multi=True,
+                                     clearable=False,
                                      disabled=False,
                                      style={'display': True},
                                      placeholder='Select Service', className='dcc_compon')
@@ -263,7 +233,7 @@ def render_content(tab):
                                   inline=True,
                                   style={'text-align': 'center', 'color': 'white'}, className='custom-radio-items')
                ])
-            ],"row flex-display"),
+            ], "row flex-display"),
 
             html.Div([
                 html.Div([
@@ -280,7 +250,7 @@ def render_content(tab):
                Input('id_choose', 'value')])
 def update_graph(select_region, id_choose):
 
-    tq_gara = df[['Brand', 'Name Gara']].groupby('Brand').agg(Name_count=('Name Gara', 'count')).reset_index()
+    tq_gara = gara[['Brand', 'Name Gara']].groupby('Brand').agg(Name_count=('Name Gara', 'count')).reset_index()
     tq_gara.columns = ['Brand', 'Count']
 
     tq_showroom = showroom[['Brand', 'Name']].groupby('Brand').agg(Name_count=('Name', 'count')).reset_index()
@@ -298,8 +268,6 @@ def update_graph(select_region, id_choose):
             filtered_brand_counts = tq_gara
         else:
             filtered_brand_counts = tq_showroom
-
-
 
     return {
         'data': [
@@ -367,7 +335,7 @@ def update_graph(select_region):
 
     bar_chart.update_layout(
         xaxis_title='Service',
-        yaxis_title='Count',
+        yaxis_title='Số lượng công ty, doanh nghiệp',
         title={
             'text': f'Dịch vụ về oto tại {select_region}',
             'y': 0.99,
@@ -375,13 +343,11 @@ def update_graph(select_region):
             'xanchor': 'center',
             'yanchor': 'top'
         },
-        # title_x=0.5,
         titlefont={'color': 'white', 'size': 15},
         xaxis=dict(
             title='<b>Service</b>',
             color='white',
             showline=True,
-            # showgrid=True,
             showticklabels=True,
             linecolor='white',
             linewidth=2,
@@ -418,23 +384,30 @@ def update_graph(select_region):
 
 
 @app.callback(Output('top_2', 'figure'), [Input('select_service', 'value')])
-def update_graph(select_service):
+def update_graph(selected_services):
+    # If no service is selected, return an empty figure or handle it accordingly
+    if not selected_services:
+        return px.scatter()
+
     dt = data_company.groupby(['Service', 'Years active']).size().reset_index(name='Count')
     dt = dt.drop(dt[dt['Years active'] == 0].index)
 
-    data_years = dt[dt['Service'] == select_service]
-    stick_chart = px.strip(data_years, x='Years active', y='Count',
-                           title=f'Stick Chart for Years Active in {select_service}',
-                           orientation='v',  # 'v' for vertical
-                           color_discrete_sequence=['#3498db'])  # Set color (e.g., blue)
+    if isinstance(selected_services, str):
+        selected_services = [selected_services]
+
+    data_years = dt[dt['Service'].isin(selected_services)]
+    area_chart = px.area(data_years, x='Years active', y='Count', color='Service',
+                         color_discrete_sequence=px.colors.qualitative.Set1,
+                         facet_col='Service', facet_col_wrap=len(selected_services))
+
 
     # Customize the chart appearance
-    stick_chart.update_layout(
+    area_chart.update_layout(
         plot_bgcolor='#010915',
         paper_bgcolor='#010915',
         font=dict(family='Arial', size=14, color='white'),
         title_font=dict(size=18, color='white'),
-        showlegend=False,
+        showlegend=True,
         title_x=0.5,
 
         xaxis=dict(
@@ -450,7 +423,7 @@ def update_graph(select_service):
             )
         ),
         yaxis=dict(
-            title='<b>Count</b>',
+            title='<b>Số lượng công ty</b>',
             color='white',
             showline=True,
             showgrid=False,
@@ -462,68 +435,75 @@ def update_graph(select_service):
             )
         )
     )
+    area_chart.update_traces(
+        hovertemplate='<b>%{x}</b><br>Count: %{y}',  # Hover template
+        mode='markers+lines',
+        marker=dict(size=8),
+    )
 
-    return stick_chart
+    return area_chart
 
 
 @app.callback(Output('top_4', 'figure'),
               [Input('select_service', 'value')])
 
-def update_graph(select_service):
+def update_graph(selected_services):
+    # If no service is selected, return an empty figure or handle it accordingly
+    if not selected_services:
+        return px.scatter()
+
     data_cpn_all = pd.concat([data[['Name', 'Province', 'Service']], data_company[['Name', 'Province', 'Service']]])
     dt1 = data_cpn_all.groupby(['Service', 'Province']).size().reset_index(name='Count')
-    count_car = dt1[dt1['Service'] == select_service]
-    area_chart = px.area(count_car, x='Province', y='Count', title='Số lượng doanh nghiệp ngành ' + str(select_service))
+
+    if isinstance(selected_services, str):
+        selected_services = [selected_services]
+
+    data_selected = dt1[dt1['Service'].isin(selected_services)]
+
+    line_chart = px.line(data_selected, x='Province', y='Count', color='Service',
+                         title=f'Số lượng doanh nghiệp theo ngành và tỉnh',
+                         labels={'Count': 'Số lượng doanh nghiệp', 'Province': 'Tỉnh'})
 
     # Customize the chart appearance
-    area_chart.update_layout(
+    line_chart.update_layout(
         plot_bgcolor='#010915',
         paper_bgcolor='#010915',
         font=dict(family='Arial', size=14, color='white'),  # Font settings
         title_font=dict(size=18, color='white'),  # Title font settings
-        showlegend=True,  # Hide legend
+        showlegend=True,  # Show legend
         title_x=0.5,
 
-        xaxis=dict(title='<b></b>',
+        xaxis=dict(title='<b>Tỉnh</b>',
                    color='white',
                    showline=True,
                    showgrid=False,
                    showticklabels=True,
-                   # linecolor='white',
-                   # linewidth=2,
-                   # ticks='outside',
                    tickfont=dict(
                        family='Arial',
                        size=12,
                        color='white'
                    )
-
                    ),
         yaxis=dict(title='<b>Số lượng doanh nghiệp</b>',
                    color='white',
                    showline=True,
                    showgrid=False,
                    showticklabels=True,
-                   # linecolor='white',
-                   # linewidth=2,
-                   # ticks='outside',
                    tickfont=dict(
                        family='Arial',
                        size=12,
                        color='white'
                    )
-
                    ),
-
     )
 
-    area_chart.update_traces(
-        fill='tozeroy',  # Fill area to the x-axis
-        line=dict(color='#52BE80 ', width=2),  # Line style
-        hovertemplate='<b>%{x}</b><br>Count: %{y}',  # Hover template
+    line_chart.update_traces(
+        hovertemplate='<b>%{x}</b><br>Count: %{y}',
+        mode='markers+lines',
+        marker=dict(size=4),
     )
 
-    return area_chart
+    return line_chart
 
 # combination of bar and line chart (population and area)
 @app.callback(Output('bar_line_1', 'figure'),
@@ -532,14 +512,14 @@ def update_graph(select_service):
 
 def update_graph(select_brand):
     # Create a bar chart for brand counts by province (brand_pro DataFrame)
-    brand_pro = df.groupby(['Brand', 'Province']).size().reset_index(name='Count')
-    brand_lk = df.groupby(['Brand', 'Liên kết']).size().reset_index(name='Count')
+    brand_pro = gara.groupby(['Brand', 'Province']).size().reset_index(name='Count')
+    brand_lk = gara.groupby(['Brand', 'Liên kết']).size().reset_index(name='Count')
 
     # Filter data for the selected brand
     brand_pro_selected = brand_pro[brand_pro['Brand'] == select_brand]
 
     brand_lk_selected = brand_lk[brand_lk['Brand'] == select_brand]
-    province_names = brand_pro_selected['Province'].tolist()
+    # province_names = brand_pro_selected['Province'].tolist()
     # Create a bar chart for brand counts by province
     bar_pro_fig = go.Bar(
         x=brand_pro_selected['Province'],
@@ -631,13 +611,11 @@ def update_graph(select_brand):
 
             )],
 
-
-
         'layout': go.Layout(
              plot_bgcolor='#010915',
              paper_bgcolor='#010915',
              title={
-                'text': 'Biểu đồ số lượng hãng xe : ' + (select_brand) + ' đang bán tai showroom',
+                'text': 'Biểu đồ số lượng hãng xe : ' +(select_brand)+ ' đang bán tai showroom',
 
                 'y': 0.96,
                 'x': 0.5,
@@ -707,12 +685,10 @@ def update_graph(id_visua):
     service_company = service_company.groupby(['Service', 'Province'])['Name'].count().reset_index()
     service_company.rename(columns={'Name': 'Company Count'}, inplace=True)
 
-
     if id_visua == 'Group':
         return fig_group
     elif id_visua == 'Automobile Company':
-        fig = px.sunburst(service_company, path=['Service', 'Province'], values='Company Count', color='Company Count', color_continuous_scale='viridis')
-
+        fig = px.sunburst(service_company, path=['Service', 'Province'], values='Company Count', color='Company Count', color_continuous_scale='cividis')
         fig.update_layout(
             title={
                 'text': 'Số lượng công ty của các tỉnh thành phân bố theo ngành',
@@ -722,7 +698,6 @@ def update_graph(id_visua):
         )
 
         return fig
-
 
 if __name__ == '__main__':
     app.run(debug=True)
