@@ -688,8 +688,10 @@ def update_graph(id_visua):
     if id_visua == 'Group':
         return fig_group
     elif id_visua == 'Automobile Company':
-        fig = px.sunburst(service_company, path=['Service', 'Province'], values='Company Count', color='Company Count', color_continuous_scale='cividis')
+        fig = px.sunburst(service_company, path=['Service', 'Province'], values='Company Count', color='Company Count', color_continuous_scale='YlOrBr')
         fig.update_layout(
+            plot_bgcolor='#010915',
+            paper_bgcolor='#010915',
             title={
                 'text': 'Số lượng công ty của các tỉnh thành phân bố theo ngành',
                 'x': 0.5
